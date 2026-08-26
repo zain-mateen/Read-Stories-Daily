@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+:root {
+  --color-beige-50: #fbf8f2;
+  --color-beige-100: #f5efe2;
+  --color-beige-200: #ede0c8;
+  --color-beige-300: #e2cda3;
+  --color-beige-400: #d3b378;
+  --color-beige-500: #c39a58;
+
+  --color-charcoal-50: #f3f2f0;
+  --color-charcoal-100: #e2ddd6;
+  --color-charcoal-200: #beb4a5;
+  --color-charcoal-300: #8f8272;
+  --color-charcoal-400: #574c3f;
+  --color-charcoal-500: #3d352c;
+  --color-charcoal-600: #2c2620;
+  --color-charcoal-700: #221d19;
+  --color-charcoal-800: #1a1612;
+  --color-charcoal-900: #14110e;
+  --color-charcoal-950: #0d0b09;
+
+  --color-rust-400: #c17c54;
+  --color-rust-500: #ab6640;
+  --color-rust-600: #8f5334;
+
+  --background: var(--color-beige-50);
+  --foreground: var(--color-charcoal-700);
+}
+
+@theme inline {
+  --color-beige-50: var(--color-beige-50);
+  --color-beige-100: var(--color-beige-100);
+  --color-beige-200: var(--color-beige-200);
+  --color-beige-300: var(--color-beige-300);
+  --color-beige-400: var(--color-beige-400);
+  --color-beige-500: var(--color-beige-500);
+
+  --color-charcoal-50: var(--color-charcoal-50);
+  --color-charcoal-100: var(--color-charcoal-100);
+  --color-charcoal-200: var(--color-charcoal-200);
+  --color-charcoal-300: var(--color-charcoal-300);
+  --color-charcoal-400: var(--color-charcoal-400);
+  --color-charcoal-500: var(--color-charcoal-500);
+  --color-charcoal-600: var(--color-charcoal-600);
+  --color-charcoal-700: var(--color-charcoal-700);
+  --color-charcoal-800: var(--color-charcoal-800);
+  --color-charcoal-900: var(--color-charcoal-900);
+  --color-charcoal-950: var(--color-charcoal-950);
+
+  --color-rust-400: var(--color-rust-400);
+  --color-rust-500: var(--color-rust-500);
+  --color-rust-600: var(--color-rust-600);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-fraunces);
+}
+
+html {
+  scroll-padding-top: 5rem;
+}
+
+a,
+button:not(:disabled),
+input[type="submit"]:not(:disabled),
+input[type="button"]:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+label[for],
+select,
+summary {
+  cursor: pointer;
+}
+
+body {
+  background: var(--color-beige-50);
+  color: var(--color-charcoal-700);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--color-charcoal-700);
+  color: var(--color-beige-50);
+}
