@@ -8,10 +8,14 @@ export const metadata: Metadata = {
   description: "Search stories across Read Stories Daily.",
 };
 
+// Posts are managed live through /admin (database-backed).
+export const dynamic = "force-dynamic";
+
 export default async function SearchPage(props: PageProps<"/search">) {
   const params = await props.searchParams;
   const raw = params.q;
   const query = typeof raw === "string" ? raw : (raw?.[0] ?? "");
+  const posts = await getAllPosts();
 
   return (
     <>
@@ -32,11 +36,7 @@ export default async function SearchPage(props: PageProps<"/search">) {
 
       <Container>
         <div className="py-14 sm:py-16">
-          <PostFilterGrid
-            posts={getAllPosts()}
-            showSearch
-            initialQuery={query}
-          />
+          <PostFilterGrid posts={posts} showSearch initialQuery={query} />
         </div>
       </Container>
     </>

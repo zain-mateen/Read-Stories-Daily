@@ -6,9 +6,9 @@ import BlogCard from "@/components/blog/BlogCard";
 import { categories, getCategoryBySlug } from "@/data/categories";
 import { getPostsByCategory } from "@/data/posts";
 
-export function generateStaticParams() {
-  return categories.map((category) => ({ slug: category.slug }));
-}
+// Posts are managed live through /admin (database-backed), so this route
+// always renders fresh rather than being pre-generated at build time.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(
   props: PageProps<"/category/[slug]">
@@ -29,7 +29,7 @@ export default async function CategoryPage(
   const category = getCategoryBySlug(slug);
   if (!category) notFound();
 
-  const posts = getPostsByCategory(slug);
+  const posts = await getPostsByCategory(slug);
   const Icon = category.icon;
 
   return (

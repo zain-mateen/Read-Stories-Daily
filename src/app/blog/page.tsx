@@ -9,8 +9,12 @@ export const metadata: Metadata = {
     "All stories from Read Stories Daily — travel, lifestyle, culture, and wellness.",
 };
 
-export default function BlogPage() {
-  const posts = getAllPosts();
+// Posts are managed live through /admin (database-backed), so this page
+// always renders fresh rather than being baked in at build time.
+export const dynamic = "force-dynamic";
+
+export default async function BlogPage() {
+  const posts = await getAllPosts();
 
   return (
     <>

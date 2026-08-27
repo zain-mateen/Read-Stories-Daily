@@ -7,37 +7,49 @@ import CategorySection from "@/components/blog/CategorySection";
 import { getFeaturedPost, getRecentPosts } from "@/data/posts";
 import { categories } from "@/data/categories";
 
-export default function Home() {
-  const featured = getFeaturedPost();
-  const recent = getRecentPosts(3, featured.slug);
+// Posts are managed live through /admin (database-backed), so this page
+// always renders fresh rather than being baked in at build time.
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const featured = await getFeaturedPost();
+  const recent = await getRecentPosts(3, featured?.slug);
 
   return (
     <>
       <Hero />
 
       <Container>
-        <section className="py-14 sm:py-16">
-          <FeaturedPost post={featured} />
-        </section>
+        {featured ? (
+          <>
+            <section className="py-14 sm:py-16">
+              <FeaturedPost post={featured} />
+            </section>
 
-        <div className="h-px w-full bg-charcoal-700/10" />
+            <div className="h-px w-full bg-charcoal-700/10" />
+          </>
+        ) : null}
 
-        <section className="py-14 sm:py-16">
-          <SectionHeading
-            eyebrow="Fresh off the press"
-            title="Latest Stories"
-            description="The newest reads from across the blog, updated regularly."
-            viewMoreHref="/blog"
-            viewMoreLabel="View all posts"
-          />
-          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {recent.map((post) => (
-              <BlogCard key={post.slug} post={post} />
-            ))}
-          </div>
-        </section>
+        {recent.length > 0 ? (
+          <>
+            <section className="py-14 sm:py-16">
+              <SectionHeading
+                eyebrow="Fresh off the press"
+                title="Latest Stories"
+                description="The newest reads from across the blog, updated regularly."
+                viewMoreHref="/blog"
+                viewMoreLabel="View all posts"
+              />
+              <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {recent.map((post) => (
+                  <BlogCard key={post.slug} post={post} />
+                ))}
+              </div>
+            </section>
 
-        <div className="h-px w-full bg-charcoal-700/10" />
+            <div className="h-px w-full bg-charcoal-700/10" />
+          </>
+        ) : null}
 
         {categories.map((category, index) => (
           <div key={category.slug}>

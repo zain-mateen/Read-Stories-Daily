@@ -21,6 +21,15 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**",
       },
+      // Posts are now managed through the admin panel, and images are
+      // supplied as arbitrary URLs (pasted from any host). Widening the
+      // pattern lets next/image optimize those without editing this file
+      // for every new source. Tighten this back down to specific hostnames
+      // if you'd rather keep an explicit allowlist.
+      {
+        protocol: "https",
+        hostname: "**",
+      },
     ],
   },
 };

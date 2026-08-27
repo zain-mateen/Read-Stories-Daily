@@ -8,7 +8,6 @@ import BlogCard from "@/components/blog/BlogCard";
 import CoverArt from "@/components/blog/CoverArt";
 import SectionHeading from "@/components/ui/SectionHeading";
 import {
-  getAllPosts,
   getPostBySlug,
   getRelatedPosts,
   type PostBlock,
@@ -46,15 +45,15 @@ function ContentBlock({ block }: { block: PostBlock }) {
   }
 }
 
-export function generateStaticParams() {
-  return getAllPosts().map((post) => ({ slug: post.slug }));
-}
+// Posts are managed live through /admin (database-backed), so this route
+// always renders fresh rather than being pre-generated at build time.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(
   props: PageProps<"/blog/[slug]">
 ): Promise<Metadata> {
   const { slug } = await props.params;
-  const post = getPostBySlug(slug);
+  const post = await getPostBySlug(slug);
   if (!post) return {};
   return {
     title: post.title,
@@ -66,11 +65,11 @@ export default async function BlogPostPage(
   props: PageProps<"/blog/[slug]">
 ) {
   const { slug } = await props.params;
-  const post = getPostBySlug(slug);
+  const post = await getPostBySlug(slug);
   if (!post) notFound();
 
   const category = getCategoryBySlug(post.category);
-  const related = getRelatedPosts(post, 3);
+  const related = await getRelatedPosts(post, 3);
 
   return (
     <article>

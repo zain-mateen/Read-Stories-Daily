@@ -3,7 +3,7 @@ import { getPostsByCategory } from "@/data/posts";
 import SectionHeading from "@/components/ui/SectionHeading";
 import BlogCard from "./BlogCard";
 
-export default function CategorySection({
+export default async function CategorySection({
   categorySlug,
   limit = 3,
 }: {
@@ -11,7 +11,8 @@ export default function CategorySection({
   limit?: number;
 }) {
   const category = getCategoryBySlug(categorySlug);
-  const posts = getPostsByCategory(categorySlug).slice(0, limit);
+  const allPosts = await getPostsByCategory(categorySlug);
+  const posts = allPosts.slice(0, limit);
 
   if (!category || posts.length === 0) return null;
 
