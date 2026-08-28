@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Fraunces, Inter } from "next/font/google";
 import AppShell from "@/components/layout/AppShell";
+import { SITE_URL } from "@/lib/siteUrl";
 import "./globals.css";
 
 const inter = Inter({
@@ -17,16 +18,29 @@ const fraunces = Fraunces({
   axes: ["opsz", "SOFT", "WONK"],
 });
 
+const description =
+  "Read Stories Daily is a modern blog covering travel, lifestyle, culture, and wellness — fresh stories worth reading, every day.";
+
 export const metadata: Metadata = {
-  ...(process.env.NEXT_PUBLIC_SITE_URL
-    ? { metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL) }
-    : {}),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Read Stories Daily — Travel, Lifestyle & Culture Blog",
     template: "%s — Read Stories Daily",
   },
-  description:
-    "Read Stories Daily is a modern blog covering travel, lifestyle, culture, and wellness — fresh stories worth reading, every day.",
+  description,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: "Read Stories Daily",
+    url: SITE_URL,
+    title: "Read Stories Daily — Travel, Lifestyle & Culture Blog",
+    description,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Read Stories Daily — Travel, Lifestyle & Culture Blog",
+    description,
+  },
 };
 
 // Monetag's exact <script> tag (src + attributes) is issued per-account

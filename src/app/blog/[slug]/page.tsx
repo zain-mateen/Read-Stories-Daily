@@ -55,9 +55,26 @@ export async function generateMetadata(
   const { slug } = await props.params;
   const post = await getPostBySlug(slug);
   if (!post) return {};
+  const url = `/blog/${post.slug}`;
   return {
     title: post.title,
     description: post.excerpt,
+    alternates: { canonical: url },
+    openGraph: {
+      type: "article",
+      url,
+      title: post.title,
+      description: post.excerpt,
+      publishedTime: post.date,
+      authors: [post.author.name],
+      images: post.image ? [post.image] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+      images: post.image ? [post.image] : undefined,
+    },
   };
 }
 
