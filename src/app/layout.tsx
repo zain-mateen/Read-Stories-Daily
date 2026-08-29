@@ -57,6 +57,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${inter.variable} ${fraunces.variable} h-full antialiased`}
     >
+    <head>
+      <script src="https://quge5.com/88/tag.min.js" data-zone="274324" async data-cfasync="false"></script>
+    </head>
       <body className="flex min-h-full flex-col bg-beige-50 text-charcoal-700">
         <AppShell>{children}</AppShell>
         {monetagScriptSrc ? (
