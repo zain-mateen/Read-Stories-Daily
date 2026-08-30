@@ -61,6 +61,20 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <script src="https://quge5.com/88/tag.min.js" data-zone="274324" async data-cfasync="false"></script>
     </head>
       <body className="flex min-h-full flex-col bg-beige-50 text-charcoal-700">
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-3C8SS4ELCH"
+        strategy="afterInteractive"
+      />
+
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-3C8SS4ELCH');
+        `}
+      </Script>
         <AppShell>{children}</AppShell>
         {monetagScriptSrc ? (
           <Script
