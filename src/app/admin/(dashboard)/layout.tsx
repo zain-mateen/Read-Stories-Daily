@@ -22,6 +22,18 @@ export default function AdminDashboardLayout({
             Read Stories Daily <span className="text-rust-600">Admin</span>
           </Link>
           <div className="flex items-center gap-5 text-sm font-medium">
+            <Link
+              href="/admin/posts"
+              className="text-charcoal-500 transition-colors hover:text-rust-600"
+            >
+              Posts
+            </Link>
+            <Link
+              href="/admin/comments"
+              className="text-charcoal-500 transition-colors hover:text-rust-600"
+            >
+              Comments
+            </Link>
             <a
               href="/"
               target="_blank"

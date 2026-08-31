@@ -77,7 +77,7 @@ async function runEnsureSchema(pool: mysql.Pool): Promise<void> {
       CREATE TABLE IF NOT EXISTS posts (
         id INT AUTO_INCREMENT PRIMARY KEY,
         slug VARCHAR(255) NOT NULL UNIQUE,
-        title VARCHAR(255) NOT NULL,
+        title VARCHAR(1000) NOT NULL,
         excerpt TEXT NOT NULL,
         category VARCHAR(80) NOT NULL,
         author_name VARCHAR(255) NOT NULL,
@@ -126,6 +126,20 @@ async function runEnsureSchema(pool: mysql.Pool): Promise<void> {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     `);
 
+    // Reader comments on a post. Deleting a post removes its comments.
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS comments (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        post_id INT NOT NULL,
+        author_name VARCHAR(80) NOT NULL,
+        body VARCHAR(4000) NOT NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_post_created (post_id, created_at),
+        CONSTRAINT fk_comments_post FOREIGN KEY (post_id)
+          REFERENCES posts(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
     // `posts` may predate blog_number — MySQL has no ADD COLUMN IF NOT EXISTS.
     const [cols] = await pool.query(
       `SELECT 1 FROM information_schema.columns
@@ -137,6 +151,16 @@ async function runEnsureSchema(pool: mysql.Pool): Promise<void> {
         `ALTER TABLE posts ADD COLUMN blog_number INT NULL,
            ADD UNIQUE KEY uq_blog_number (blog_number)`
       );
+    }
+
+    // `posts.title` was originally VARCHAR(255) — widen it in place.
+    const [titleCol] = await pool.query(
+      `SELECT character_maximum_length AS len FROM information_schema.columns
+        WHERE table_schema = DATABASE() AND table_name = 'posts'
+          AND column_name = 'title' LIMIT 1`
+    );
+    if (((titleCol as { len: number }[])[0]?.len ?? 0) < 1000) {
+      await pool.query(`ALTER TABLE posts MODIFY title VARCHAR(1000) NOT NULL`);
     }
   } catch (err) {
     // Logged once per process, as a warning so it doesn't trip the dev

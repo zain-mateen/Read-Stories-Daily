@@ -259,6 +259,7 @@ export default function PostForm({
           <input
             id="title"
             required
+            maxLength={1000}
             value={title}
             onChange={(e) => {
               setTitle(e.target.value);

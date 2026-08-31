@@ -39,6 +39,9 @@ export async function validatePostPayload(
   }
 
   if (!title) return { error: "Title is required." };
+  if (title.length > 1000) {
+    return { error: "Title must be 1000 characters or fewer." };
+  }
   if (!slug) return { error: "Couldn't derive a slug — check the title." };
   if (!(await isCategorySlug(category))) {
     return { error: "Choose a valid category." };

@@ -6,12 +6,14 @@ import { ArrowLeft, CalendarBlank, Clock } from "@phosphor-icons/react/ssr";
 import Container from "@/components/ui/Container";
 import BlogCard from "@/components/blog/BlogCard";
 import CoverArt from "@/components/blog/CoverArt";
+import CommentsSection from "@/components/blog/CommentsSection";
 import SectionHeading from "@/components/ui/SectionHeading";
 import {
   getPostBySlug,
   getRelatedPosts,
   type PostBlock,
 } from "@/data/posts";
+import { getCommentsForPost } from "@/data/comments";
 import { postSummary } from "@/lib/postText";
 
 function formatDate(dateStr: string) {
@@ -84,7 +86,10 @@ export default async function BlogPostPage(props: PageProps<"/blog/[slug]">) {
   const post = await getPostBySlug(slug);
   if (!post) notFound();
 
-  const related = await getRelatedPosts(post, 3);
+  const [related, comments] = await Promise.all([
+    getRelatedPosts(post, 3),
+    getCommentsForPost(post.id),
+  ]);
 
   return (
     <article>
@@ -180,6 +185,12 @@ export default async function BlogPostPage(props: PageProps<"/blog/[slug]">) {
               <p className="text-sm text-charcoal-400">{post.author.role}</p>
             </div>
           </div>
+        </div>
+      </Container>
+
+      <Container>
+        <div className="mx-auto max-w-3xl border-t border-charcoal-700/10 py-12 sm:py-14">
+          <CommentsSection postSlug={post.slug} initialComments={comments} />
         </div>
       </Container>
 
