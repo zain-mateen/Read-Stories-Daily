@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Clock } from "@phosphor-icons/react/ssr";
 import type { Post } from "@/data/posts";
+import { postPreview } from "@/lib/postText";
 import CoverArt from "./CoverArt";
 
 function formatDate(dateStr: string) {
@@ -21,15 +22,16 @@ export default function BlogCard({ post }: { post: Post }) {
       <CoverArt
         image={post.image}
         alt={post.title}
-        category={post.category}
+        categoryLabel={post.categoryName}
+        blogNumber={post.blogNumber}
         className="aspect-[16/10] w-full"
       />
       <div className="flex flex-1 flex-col gap-3 p-5 sm:p-6">
-        <h3 className="font-display text-lg font-semibold leading-snug text-charcoal-800 transition-colors group-hover:text-rust-600 sm:text-xl">
+        <h3 className="line-clamp-3 font-display text-lg font-semibold leading-snug text-charcoal-800 transition-colors group-hover:text-rust-600 sm:text-xl">
           {post.title}
         </h3>
         <p className="line-clamp-2 text-sm leading-relaxed text-charcoal-400">
-          {post.excerpt}
+          {postPreview(post)}
         </p>
         <div className="mt-auto flex items-center gap-2.5 pt-2 text-xs text-charcoal-300">
           <Image

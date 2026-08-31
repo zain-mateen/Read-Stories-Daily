@@ -2,10 +2,13 @@ import Image from "next/image";
 import { ArrowRight, BookOpen, MagnifyingGlass } from "@phosphor-icons/react/ssr";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
-import { categories } from "@/data/categories";
 import { site } from "@/data/site";
 
-export default function Hero() {
+export default function Hero({
+  categories,
+}: {
+  categories: { slug: string; name: string }[];
+}) {
   return (
     <section className="relative flex min-h-[560px] items-end overflow-hidden border-b border-charcoal-700/10 sm:min-h-[640px] lg:min-h-[720px]">
       <Image
@@ -22,7 +25,7 @@ export default function Hero() {
       <Container className="relative w-full pb-14 pt-28 sm:pb-16 lg:pb-20">
         <span className="mb-5 flex w-fit items-center gap-2 rounded-full border border-beige-50/25 bg-beige-50/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-widest text-beige-100 backdrop-blur-sm">
           <BookOpen size={15} weight="bold" className="text-rust-400" />
-          Stories worth your morning coffee
+          A new story every day
         </span>
 
         <h1 className="max-w-2xl font-display text-4xl font-semibold leading-[1.1] tracking-tight text-beige-50 sm:text-5xl lg:text-[3.5rem]">
@@ -30,9 +33,9 @@ export default function Hero() {
           <span className="text-rust-400">worth remembering.</span>
         </h1>
         <p className="mt-5 max-w-lg text-base leading-relaxed text-beige-100/85 sm:text-lg">
-          Read Stories Daily is a small, independent blog about travel,
-          lifestyle, culture, and wellness — honest writing, no clickbait,
-          published for people who still like to read.
+          Read Stories Daily is a small, independent blog of real-life stories,
+          mysteries, horror, and the strange-but-true — honest writing, no
+          clickbait, for people who still like to read.
         </p>
 
         <div className="mt-8 flex flex-wrap items-center gap-4">
@@ -46,18 +49,19 @@ export default function Hero() {
           </Button>
         </div>
 
-        <div className="mt-9 flex flex-wrap items-center gap-2.5">
-          {categories.map((category) => (
-            <a
-              key={category.slug}
-              href={`/category/${category.slug}`}
-              className="flex items-center gap-1.5 rounded-full border border-beige-50/20 bg-beige-50/5 px-3.5 py-1.5 text-xs font-medium text-beige-100/90 backdrop-blur-sm transition-colors hover:border-rust-400/60 hover:bg-beige-50/15 hover:text-beige-50"
-            >
-              <category.icon size={13} />
-              {category.name}
-            </a>
-          ))}
-        </div>
+        {categories.length > 0 ? (
+          <div className="mt-9 flex flex-wrap items-center gap-2.5">
+            {categories.map((category) => (
+              <a
+                key={category.slug}
+                href={`/category/${category.slug}`}
+                className="rounded-full border border-beige-50/20 bg-beige-50/5 px-3.5 py-1.5 text-xs font-medium text-beige-100/90 backdrop-blur-sm transition-colors hover:border-rust-400/60 hover:bg-beige-50/15 hover:text-beige-50"
+              >
+                {category.name}
+              </a>
+            ))}
+          </div>
+        ) : null}
       </Container>
     </section>
   );

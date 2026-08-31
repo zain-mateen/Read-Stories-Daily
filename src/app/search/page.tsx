@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Container from "@/components/ui/Container";
 import PostFilterGrid from "@/components/blog/PostFilterGrid";
 import { getAllPosts } from "@/data/posts";
+import { getAllCategories } from "@/data/categories";
 
 export const metadata: Metadata = {
   title: "Search",
@@ -15,7 +16,10 @@ export default async function SearchPage(props: PageProps<"/search">) {
   const params = await props.searchParams;
   const raw = params.q;
   const query = typeof raw === "string" ? raw : (raw?.[0] ?? "");
-  const posts = await getAllPosts();
+  const [posts, categories] = await Promise.all([
+    getAllPosts(),
+    getAllCategories(),
+  ]);
 
   return (
     <>
@@ -28,7 +32,7 @@ export default async function SearchPage(props: PageProps<"/search">) {
             Find your next read.
           </h1>
           <p className="mt-3 max-w-2xl text-base leading-relaxed text-charcoal-400">
-            Search by title, topic, or author, and narrow it down by
+            Search by title, author, or blog number, and narrow it down by
             category.
           </p>
         </Container>
@@ -36,7 +40,12 @@ export default async function SearchPage(props: PageProps<"/search">) {
 
       <Container>
         <div className="py-14 sm:py-16">
-          <PostFilterGrid posts={posts} showSearch initialQuery={query} />
+          <PostFilterGrid
+            posts={posts}
+            categories={categories.map((c) => ({ slug: c.slug, name: c.name }))}
+            showSearch
+            initialQuery={query}
+          />
         </div>
       </Container>
     </>

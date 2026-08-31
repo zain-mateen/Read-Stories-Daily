@@ -1,4 +1,4 @@
-import { query, execute } from "@/lib/db";
+import { query, execute, readQuery } from "@/lib/db";
 
 export type PostBlock =
   | { type: "paragraph"; text: string }
@@ -15,13 +15,18 @@ export type Post = {
   id: number;
   slug: string;
   title: string;
+  /** Optional search/social description. May be an empty string. */
   excerpt: string;
   category: string;
+  /** Display name of the category, resolved via join. Falls back to the slug. */
+  categoryName: string;
   author: Author;
   date: string;
   readTime: string;
   featured: boolean;
   image: string;
+  /** Optional unique number the admin can assign and search by. */
+  blogNumber: number | null;
   content: PostBlock[];
 };
 
@@ -38,6 +43,7 @@ export type PostInput = {
   readTime: string;
   featured: boolean;
   image: string;
+  blogNumber: number | null;
   content: PostBlock[];
 };
 
@@ -47,6 +53,7 @@ type PostRow = {
   title: string;
   excerpt: string;
   category: string;
+  category_name: string | null;
   author_name: string;
   author_role: string;
   author_avatar: string;
@@ -54,6 +61,7 @@ type PostRow = {
   read_time: string;
   featured: number;
   image: string;
+  blog_number: number | string | null;
   content: string;
 };
 
@@ -68,8 +76,9 @@ function mapRow(row: PostRow): Post {
     id: row.id,
     slug: row.slug,
     title: row.title,
-    excerpt: row.excerpt,
+    excerpt: row.excerpt ?? "",
     category: row.category,
+    categoryName: row.category_name ?? row.category,
     author: {
       name: row.author_name,
       role: row.author_role,
@@ -79,42 +88,52 @@ function mapRow(row: PostRow): Post {
     readTime: row.read_time,
     featured: !!row.featured,
     image: row.image,
+    blogNumber: row.blog_number == null ? null : Number(row.blog_number),
     content,
   };
 }
 
-const ORDER = "ORDER BY published_date DESC, id DESC";
+const SELECT_POST = `SELECT p.*, c.name AS category_name
+  FROM posts p
+  LEFT JOIN categories c ON c.slug = p.category`;
+const ORDER = "ORDER BY p.published_date DESC, p.id DESC";
 
 // ---- Public reads (used throughout the site) ----------------------------
 
 export async function getAllPosts(): Promise<Post[]> {
-  const rows = await query<PostRow>(`SELECT * FROM posts ${ORDER}`);
+  const rows = await readQuery<PostRow>([], `${SELECT_POST} ${ORDER}`);
   return rows.map(mapRow);
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | undefined> {
-  const rows = await query<PostRow>(
-    "SELECT * FROM posts WHERE slug = ? LIMIT 1",
+  const rows = await readQuery<PostRow>(
+    [],
+    `${SELECT_POST} WHERE p.slug = ? LIMIT 1`,
     [slug]
   );
   return rows[0] ? mapRow(rows[0]) : undefined;
 }
 
 export async function getPostsByCategory(categorySlug: string): Promise<Post[]> {
-  const rows = await query<PostRow>(
-    `SELECT * FROM posts WHERE category = ? ${ORDER}`,
+  const rows = await readQuery<PostRow>(
+    [],
+    `${SELECT_POST} WHERE p.category = ? ${ORDER}`,
     [categorySlug]
   );
   return rows.map(mapRow);
 }
 
 export async function getFeaturedPost(): Promise<Post | undefined> {
-  const featured = await query<PostRow>(
-    `SELECT * FROM posts WHERE featured = 1 ${ORDER} LIMIT 1`
+  const featured = await readQuery<PostRow>(
+    [],
+    `${SELECT_POST} WHERE p.featured = 1 ${ORDER} LIMIT 1`
   );
   if (featured[0]) return mapRow(featured[0]);
 
-  const mostRecent = await query<PostRow>(`SELECT * FROM posts ${ORDER} LIMIT 1`);
+  const mostRecent = await readQuery<PostRow>(
+    [],
+    `${SELECT_POST} ${ORDER} LIMIT 1`
+  );
   return mostRecent[0] ? mapRow(mostRecent[0]) : undefined;
 }
 
@@ -123,17 +142,19 @@ export async function getRecentPosts(
   excludeSlug?: string
 ): Promise<Post[]> {
   const rows = excludeSlug
-    ? await query<PostRow>(
-        `SELECT * FROM posts WHERE slug != ? ${ORDER} LIMIT ?`,
+    ? await readQuery<PostRow>(
+        [],
+        `${SELECT_POST} WHERE p.slug != ? ${ORDER} LIMIT ?`,
         [excludeSlug, limit]
       )
-    : await query<PostRow>(`SELECT * FROM posts ${ORDER} LIMIT ?`, [limit]);
+    : await readQuery<PostRow>([], `${SELECT_POST} ${ORDER} LIMIT ?`, [limit]);
   return rows.map(mapRow);
 }
 
 export async function getRelatedPosts(post: Post, limit: number): Promise<Post[]> {
-  const rows = await query<PostRow>(
-    `SELECT * FROM posts WHERE category = ? AND slug != ? ${ORDER} LIMIT ?`,
+  const rows = await readQuery<PostRow>(
+    [],
+    `${SELECT_POST} WHERE p.category = ? AND p.slug != ? ${ORDER} LIMIT ?`,
     [post.category, post.slug, limit]
   );
   return rows.map(mapRow);
@@ -142,9 +163,11 @@ export async function getRelatedPosts(post: Post, limit: number): Promise<Post[]
 // ---- Admin reads/writes (used by /admin) ---------------------------------
 
 export async function getPostById(id: number): Promise<Post | undefined> {
-  const rows = await query<PostRow>("SELECT * FROM posts WHERE id = ? LIMIT 1", [
-    id,
-  ]);
+  const rows = await readQuery<PostRow>(
+    [],
+    `${SELECT_POST} WHERE p.id = ? LIMIT 1`,
+    [id]
+  );
   return rows[0] ? mapRow(rows[0]) : undefined;
 }
 
@@ -160,12 +183,28 @@ export async function isSlugTaken(slug: string, excludeId?: number): Promise<boo
   return rows.length > 0;
 }
 
+export async function isBlogNumberTaken(
+  blogNumber: number,
+  excludeId?: number
+): Promise<boolean> {
+  const rows = excludeId
+    ? await query<{ id: number }>(
+        "SELECT id FROM posts WHERE blog_number = ? AND id != ? LIMIT 1",
+        [blogNumber, excludeId]
+      )
+    : await query<{ id: number }>(
+        "SELECT id FROM posts WHERE blog_number = ? LIMIT 1",
+        [blogNumber]
+      );
+  return rows.length > 0;
+}
+
 export async function createPost(input: PostInput): Promise<number> {
   const result = await execute(
     `INSERT INTO posts
       (slug, title, excerpt, category, author_name, author_role, author_avatar,
-       published_date, read_time, featured, image, content)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       published_date, read_time, featured, image, blog_number, content)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       input.slug,
       input.title,
@@ -178,6 +217,7 @@ export async function createPost(input: PostInput): Promise<number> {
       input.readTime,
       input.featured ? 1 : 0,
       input.image,
+      input.blogNumber,
       JSON.stringify(input.content),
     ]
   );
@@ -189,7 +229,8 @@ export async function updatePost(id: number, input: PostInput): Promise<void> {
     `UPDATE posts SET
       slug = ?, title = ?, excerpt = ?, category = ?,
       author_name = ?, author_role = ?, author_avatar = ?,
-      published_date = ?, read_time = ?, featured = ?, image = ?, content = ?
+      published_date = ?, read_time = ?, featured = ?, image = ?,
+      blog_number = ?, content = ?
      WHERE id = ?`,
     [
       input.slug,
@@ -203,6 +244,7 @@ export async function updatePost(id: number, input: PostInput): Promise<void> {
       input.readTime,
       input.featured ? 1 : 0,
       input.image,
+      input.blogNumber,
       JSON.stringify(input.content),
       id,
     ]

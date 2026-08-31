@@ -1,27 +1,28 @@
 import Link from "next/link";
-import {
-  EnvelopeSimple,
-  FacebookLogo,
-  InstagramLogo,
-  MapPinLine,
-  Phone,
-  TwitterLogo,
-  YoutubeLogo,
-} from "@phosphor-icons/react/ssr";
+import { EnvelopeSimple } from "@phosphor-icons/react/ssr";
 import Container from "@/components/ui/Container";
 import NewsletterForm from "@/components/ui/NewsletterForm";
 import Logo from "./Logo";
-import { categories } from "@/data/categories";
 import { footerPages, site } from "@/data/site";
+import type { NavCategory } from "./AppShell";
 
-const socialLinks = [
-  { label: "Instagram", href: site.social.instagram, icon: InstagramLogo },
-  { label: "Twitter", href: site.social.twitter, icon: TwitterLogo },
-  { label: "Facebook", href: site.social.facebook, icon: FacebookLogo },
-  { label: "YouTube", href: site.social.youtube, icon: YoutubeLogo },
-];
+// Social links are hidden until the profiles exist. To bring them back:
+// restore these imports + the socialLinks list, and uncomment the block
+// in the markup below.
+// import {
+//   FacebookLogo,
+//   InstagramLogo,
+//   TwitterLogo,
+//   YoutubeLogo,
+// } from "@phosphor-icons/react/ssr";
+// const socialLinks = [
+//   { label: "Instagram", href: site.social.instagram, icon: InstagramLogo },
+//   { label: "Twitter", href: site.social.twitter, icon: TwitterLogo },
+//   { label: "Facebook", href: site.social.facebook, icon: FacebookLogo },
+//   { label: "YouTube", href: site.social.youtube, icon: YoutubeLogo },
+// ];
 
-export default function Footer() {
+export default function Footer({ categories }: { categories: NavCategory[] }) {
   const year = new Date().getFullYear();
 
   return (
@@ -46,6 +47,11 @@ export default function Footer() {
           <p className="max-w-xs text-sm leading-relaxed text-beige-200/70">
             {site.description}
           </p>
+
+          {/*
+          Social links — hidden until the profiles are live. Restore the
+          imports + socialLinks list above, then uncomment this:
+
           <div className="flex items-center gap-3 pt-1">
             {socialLinks.map(({ label, href, icon: Icon }) => (
               <a
@@ -60,6 +66,7 @@ export default function Footer() {
               </a>
             ))}
           </div>
+          */}
         </div>
 
         <div>
@@ -111,19 +118,6 @@ export default function Footer() {
               >
                 {site.email}
               </a>
-            </li>
-            <li className="flex items-start gap-2.5">
-              <Phone size={17} className="mt-0.5 shrink-0 text-rust-400" />
-              <a
-                href={`tel:${site.phone.replace(/[^+\d]/g, "")}`}
-                className="transition-colors hover:text-rust-400"
-              >
-                {site.phone}
-              </a>
-            </li>
-            <li className="flex items-start gap-2.5">
-              <MapPinLine size={17} className="mt-0.5 shrink-0 text-rust-400" />
-              <span>{site.address}</span>
             </li>
           </ul>
         </div>

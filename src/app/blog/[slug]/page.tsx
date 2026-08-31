@@ -12,7 +12,7 @@ import {
   getRelatedPosts,
   type PostBlock,
 } from "@/data/posts";
-import { getCategoryBySlug } from "@/data/categories";
+import { postSummary } from "@/lib/postText";
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-US", {
@@ -56,15 +56,16 @@ export async function generateMetadata(
   const post = await getPostBySlug(slug);
   if (!post) return {};
   const url = `/blog/${post.slug}`;
+  const description = post.excerpt?.trim() || postSummary(post);
   return {
     title: post.title,
-    description: post.excerpt,
+    description,
     alternates: { canonical: url },
     openGraph: {
       type: "article",
       url,
       title: post.title,
-      description: post.excerpt,
+      description,
       publishedTime: post.date,
       authors: [post.author.name],
       images: post.image ? [post.image] : undefined,
@@ -72,20 +73,17 @@ export async function generateMetadata(
     twitter: {
       card: "summary_large_image",
       title: post.title,
-      description: post.excerpt,
+      description,
       images: post.image ? [post.image] : undefined,
     },
   };
 }
 
-export default async function BlogPostPage(
-  props: PageProps<"/blog/[slug]">
-) {
+export default async function BlogPostPage(props: PageProps<"/blog/[slug]">) {
   const { slug } = await props.params;
   const post = await getPostBySlug(slug);
   if (!post) notFound();
 
-  const category = getCategoryBySlug(post.category);
   const related = await getRelatedPosts(post, 3);
 
   return (
@@ -99,21 +97,32 @@ export default async function BlogPostPage(
           Back to all posts
         </Link>
 
-        <div className="mt-6 max-w-3xl">
-          {category ? (
+        {/* Title spans the full content width. */}
+        <div className="mt-6">
+          <div className="flex flex-wrap items-center gap-2.5">
             <Link
-              href={`/category/${category.slug}`}
-              className="w-fit rounded-full bg-charcoal-700/5 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-rust-600"
+              href={`/category/${post.category}`}
+              className="rounded-full bg-charcoal-700/5 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-rust-600"
             >
-              {category.name}
+              {post.categoryName}
             </Link>
-          ) : null}
-          <h1 className="mt-4 font-display text-3xl font-semibold leading-tight text-charcoal-800 sm:text-4xl lg:text-5xl">
+            {post.blogNumber != null ? (
+              <span className="rounded-full bg-charcoal-700/5 px-3 py-1 text-xs font-semibold tabular-nums text-charcoal-500">
+                #{post.blogNumber}
+              </span>
+            ) : null}
+          </div>
+          <h1 className="mt-4 w-full font-display text-3xl font-semibold leading-tight text-charcoal-800 sm:text-4xl lg:text-5xl">
             {post.title}
           </h1>
-          <p className="mt-4 text-lg leading-relaxed text-charcoal-400">
-            {post.excerpt}
-          </p>
+        </div>
+
+        <div className="mt-4 max-w-3xl">
+          {post.excerpt?.trim() ? (
+            <p className="text-lg leading-relaxed text-charcoal-400">
+              {post.excerpt}
+            </p>
+          ) : null}
 
           <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 border-y border-charcoal-700/10 py-4 text-sm text-charcoal-400">
             <span className="flex items-center gap-2.5">
@@ -145,7 +154,8 @@ export default async function BlogPostPage(
         <CoverArt
           image={post.image}
           alt={post.title}
-          category={post.category}
+          categoryLabel={post.categoryName}
+          blogNumber={post.blogNumber}
           priority
           className="mt-8 aspect-[16/8] w-full rounded-3xl sm:mt-10"
         />
@@ -178,8 +188,8 @@ export default async function BlogPostPage(
           <div className="border-t border-charcoal-700/10 py-14 sm:py-16">
             <SectionHeading
               eyebrow="Keep Reading"
-              title={category ? `More in ${category.name}` : "Related Stories"}
-              viewMoreHref={category ? `/category/${category.slug}` : "/blog"}
+              title={`More in ${post.categoryName}`}
+              viewMoreHref={`/category/${post.category}`}
             />
             <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {related.map((p) => (

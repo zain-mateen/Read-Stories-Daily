@@ -3,11 +3,11 @@ export const site = {
   shortName: "Read Stories",
   tagline: "Daily",
   description:
-    "Fresh stories on travel, lifestyle, culture, and wellness — worth reading, every day.",
+    "Real-life stories, mysteries, and the strange-but-true — worth reading, every day.",
   heroImage: "https://picsum.photos/seed/rsd-hero-banner/2000/1200",
-  email: "hello@readstoriesdaily.com",
-  phone: "+1 (555) 012-3456",
-  address: "128 Harbor Lane, Portland, OR 97201",
+  email: "contact@readstoriesdaily.com",
+  // Social profiles are not live yet. Kept here (and commented out in the
+  // footer) so they can be switched back on without rewriting anything.
   social: {
     instagram: "https://instagram.com",
     twitter: "https://twitter.com",
@@ -16,13 +16,11 @@ export const site = {
   },
 };
 
+// Fixed nav entries. Category links are pulled live from the database and
+// added after these by the header.
 export const primaryNav = [
   { label: "Home", href: "/" },
   { label: "Blog", href: "/blog" },
-  { label: "Travel", href: "/category/travel" },
-  { label: "Lifestyle", href: "/category/lifestyle" },
-  { label: "Culture", href: "/category/culture" },
-  { label: "Wellness", href: "/category/wellness" },
 ];
 
 export const footerPages = [

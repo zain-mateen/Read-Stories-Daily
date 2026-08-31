@@ -1,4 +1,4 @@
-import { categories } from "@/data/categories";
+import { isCategorySlug } from "@/data/categories";
 import type { PostInput } from "@/data/posts";
 import { parsePostContent } from "./postBlocks";
 import { slugify } from "./slugify";
@@ -6,7 +6,9 @@ import { slugify } from "./slugify";
 type ValidationResult = { input: PostInput } | { error: string };
 
 /** Validates and normalizes a post form submission from the admin panel. */
-export function validatePostPayload(body: unknown): ValidationResult {
+export async function validatePostPayload(
+  body: unknown
+): Promise<ValidationResult> {
   if (typeof body !== "object" || body === null) {
     return { error: "Invalid request body." };
   }
@@ -26,20 +28,29 @@ export function validatePostPayload(body: unknown): ValidationResult {
   const featured = Boolean(b.featured);
   const slug = slugify(str("slug") || title);
 
+  const blogNumberRaw = b.blogNumber ?? b.blog_number ?? "";
+  let blogNumber: number | null = null;
+  if (blogNumberRaw !== "" && blogNumberRaw !== null && blogNumberRaw !== undefined) {
+    const n = Number(blogNumberRaw);
+    if (!Number.isInteger(n) || n <= 0) {
+      return { error: "Blog number must be a positive whole number." };
+    }
+    blogNumber = n;
+  }
+
   if (!title) return { error: "Title is required." };
   if (!slug) return { error: "Couldn't derive a slug — check the title." };
-  if (!excerpt) return { error: "Excerpt is required." };
-  if (!categories.some((c) => c.slug === category)) {
+  if (!(await isCategorySlug(category))) {
     return { error: "Choose a valid category." };
   }
   if (!authorName) return { error: "Author name is required." };
   if (!authorRole) return { error: "Author role is required." };
-  if (!authorAvatar) return { error: "Author avatar URL is required." };
+  if (!authorAvatar) return { error: "Author avatar is required." };
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     return { error: "Date must be in YYYY-MM-DD format." };
   }
   if (!readTime) return { error: "Read time is required." };
-  if (!image) return { error: "Cover image URL is required." };
+  if (!image) return { error: "Cover image is required." };
 
   const content = parsePostContent(contentRaw);
   if (content.length === 0) return { error: "Content can't be empty." };
@@ -57,6 +68,7 @@ export function validatePostPayload(body: unknown): ValidationResult {
       readTime,
       featured,
       image,
+      blogNumber,
       content,
     },
   };

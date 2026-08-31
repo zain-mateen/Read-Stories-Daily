@@ -10,7 +10,7 @@ export default async function CategorySection({
   categorySlug: string;
   limit?: number;
 }) {
-  const category = getCategoryBySlug(categorySlug);
+  const category = await getCategoryBySlug(categorySlug);
   const allPosts = await getPostsByCategory(categorySlug);
   const posts = allPosts.slice(0, limit);
 
@@ -20,8 +20,7 @@ export default async function CategorySection({
     <section className="py-14 sm:py-16">
       <SectionHeading
         eyebrow={category.name}
-        icon={category.icon}
-        title={category.description}
+        title={category.description || category.name}
         viewMoreHref={`/category/${category.slug}`}
         viewMoreLabel={`All ${category.name}`}
       />

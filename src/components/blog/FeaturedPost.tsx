@@ -1,12 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Clock, Star } from "@phosphor-icons/react/ssr";
-import { getCategoryBySlug } from "@/data/categories";
 import type { Post } from "@/data/posts";
+import { postPreview } from "@/lib/postText";
 
 export default function FeaturedPost({ post }: { post: Post }) {
-  const category = getCategoryBySlug(post.category);
-
   return (
     <Link
       href={`/blog/${post.slug}`}
@@ -21,12 +19,9 @@ export default function FeaturedPost({ post }: { post: Post }) {
           sizes="(min-width: 1024px) 50vw, 100vw"
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        {category ? (
-          <span className="absolute left-4 top-4 flex items-center gap-1.5 rounded-full bg-beige-50/90 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-charcoal-700 shadow-sm backdrop-blur-sm">
-            <category.icon size={13} weight="bold" className="text-rust-500" />
-            {category.name}
-          </span>
-        ) : null}
+        <span className="absolute left-4 top-4 rounded-full bg-beige-50/90 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-charcoal-700 shadow-sm backdrop-blur-sm">
+          {post.categoryName}
+        </span>
       </div>
 
       <div className="flex flex-col justify-center gap-4 p-8 sm:p-10 lg:p-12">
@@ -37,8 +32,8 @@ export default function FeaturedPost({ post }: { post: Post }) {
         <h2 className="font-display text-2xl font-semibold leading-tight text-charcoal-800 transition-colors group-hover:text-rust-600 sm:text-3xl lg:text-[2.25rem]">
           {post.title}
         </h2>
-        <p className="max-w-md text-base leading-relaxed text-charcoal-400">
-          {post.excerpt}
+        <p className="line-clamp-3 max-w-md text-base leading-relaxed text-charcoal-400">
+          {postPreview(post)}
         </p>
         <div className="flex items-center gap-3 text-sm text-charcoal-300">
           <Image

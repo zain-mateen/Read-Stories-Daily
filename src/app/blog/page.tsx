@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import Container from "@/components/ui/Container";
 import PostFilterGrid from "@/components/blog/PostFilterGrid";
 import { getAllPosts } from "@/data/posts";
+import { getAllCategories } from "@/data/categories";
 
 export const metadata: Metadata = {
   title: "Blog",
   description:
-    "All stories from Read Stories Daily — travel, lifestyle, culture, and wellness.",
+    "Every story from Read Stories Daily — real life, mystery, horror, and the strange-but-true.",
 };
 
 // Posts are managed live through /admin (database-backed), so this page
@@ -14,7 +15,10 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function BlogPage() {
-  const posts = await getAllPosts();
+  const [posts, categories] = await Promise.all([
+    getAllPosts(),
+    getAllCategories(),
+  ]);
 
   return (
     <>
@@ -35,7 +39,11 @@ export default async function BlogPage() {
 
       <Container>
         <div className="py-14 sm:py-16">
-          <PostFilterGrid posts={posts} showSearch />
+          <PostFilterGrid
+            posts={posts}
+            categories={categories.map((c) => ({ slug: c.slug, name: c.name }))}
+            showSearch
+          />
         </div>
       </Container>
     </>

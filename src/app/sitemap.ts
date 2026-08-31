@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/siteUrl";
 import { getAllPosts } from "@/data/posts";
-import { categories } from "@/data/categories";
+import { getAllCategories } from "@/data/categories";
 
 // Posts are database-backed and change without a redeploy, so the sitemap
 // is generated per request rather than baked in at build time.
@@ -16,14 +16,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/privacy`, changeFrequency: "yearly", priority: 0.2 },
   ];
 
-  const categoryRoutes: MetadataRoute.Sitemap = categories.map((c) => ({
-    url: `${SITE_URL}/category/${c.slug}`,
-    changeFrequency: "weekly",
-    priority: 0.6,
-  }));
-
+  let categoryRoutes: MetadataRoute.Sitemap = [];
   let postRoutes: MetadataRoute.Sitemap = [];
   try {
+    const categories = await getAllCategories();
+    categoryRoutes = categories.map((c) => ({
+      url: `${SITE_URL}/category/${c.slug}`,
+      changeFrequency: "weekly",
+      priority: 0.6,
+    }));
+
     const posts = await getAllPosts();
     postRoutes = posts.map((p) => ({
       url: `${SITE_URL}/blog/${p.slug}`,

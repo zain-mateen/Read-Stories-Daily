@@ -1,14 +1,9 @@
 import { notFound } from "next/navigation";
 import PostForm from "@/components/admin/PostForm";
-import { categories } from "@/data/categories";
+import { getNavCategories } from "@/data/categories";
 import { getPostById } from "@/data/posts";
 
 export const dynamic = "force-dynamic";
-
-// Only pass plain, serializable fields to the Client Component — the
-// full Category objects carry a React icon component, which can't cross
-// the server/client boundary as a prop.
-const categoryOptions = categories.map(({ slug, name }) => ({ slug, name }));
 
 export default async function EditPostPage(
   props: PageProps<"/admin/posts/[id]/edit">
@@ -17,7 +12,10 @@ export default async function EditPostPage(
   const numericId = Number(id);
   if (!Number.isInteger(numericId) || numericId <= 0) notFound();
 
-  const post = await getPostById(numericId);
+  const [post, categories] = await Promise.all([
+    getPostById(numericId),
+    getNavCategories(),
+  ]);
   if (!post) notFound();
 
   return (
@@ -26,7 +24,11 @@ export default async function EditPostPage(
         Edit Post
       </h1>
       <div className="mt-6 max-w-3xl">
-        <PostForm mode="edit" post={post} categories={categoryOptions} />
+        <PostForm
+          mode="edit"
+          post={post}
+          categories={categories.map(({ slug, name }) => ({ slug, name }))}
+        />
       </div>
     </div>
   );

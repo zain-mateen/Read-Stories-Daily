@@ -3,25 +3,32 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { List, MagnifyingGlass, X } from "@phosphor-icons/react";
+import { CaretDown, List, MagnifyingGlass, X } from "@phosphor-icons/react";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
 import Logo from "./Logo";
 import { primaryNav } from "@/data/site";
+import type { NavCategory } from "./AppShell";
 
-export default function Header() {
+export default function Header({ categories }: { categories: NavCategory[] }) {
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [query, setQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const moreRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const router = useRouter();
   const [prevPathname, setPrevPathname] = useState(pathname);
+
+  const primaryCategories = categories.filter((c) => c.inPrimaryNav);
+  const moreCategories = categories.filter((c) => !c.inPrimaryNav);
 
   if (pathname !== prevPathname) {
     setPrevPathname(pathname);
     setOpen(false);
     setSearchOpen(false);
+    setMoreOpen(false);
   }
 
   useEffect(() => {
@@ -35,8 +42,27 @@ export default function Header() {
     if (searchOpen) searchInputRef.current?.focus();
   }, [searchOpen]);
 
+  useEffect(() => {
+    if (!moreOpen) return;
+    function onClick(e: MouseEvent) {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
+        setMoreOpen(false);
+      }
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setMoreOpen(false);
+    }
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [moreOpen]);
+
   function toggleSearch() {
     setOpen(false);
+    setMoreOpen(false);
     setSearchOpen((v) => !v);
   }
 
@@ -52,13 +78,17 @@ export default function Header() {
     setSearchOpen(false);
   }
 
+  const isCategoryActive = (slug: string) =>
+    pathname.startsWith(`/category/${slug}`);
+  const linkBase = "text-sm font-medium transition-colors hover:text-rust-600";
+
   return (
     <header className="sticky top-0 z-50 border-b border-charcoal-700/10 bg-beige-50/90 backdrop-blur">
       <Container className="flex h-18 items-center justify-between py-3 sm:h-20">
         <Logo />
 
         <div className="flex items-center gap-2 sm:gap-4">
-          <nav className="hidden items-center gap-7 lg:flex">
+          <nav className="hidden items-center gap-6 lg:flex">
             {primaryNav.map((item) => {
               const active =
                 item.href === "/"
@@ -68,7 +98,7 @@ export default function Header() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`text-sm font-medium transition-colors hover:text-rust-600 ${
+                  className={`${linkBase} ${
                     active ? "text-rust-600" : "text-charcoal-600"
                   }`}
                 >
@@ -76,6 +106,62 @@ export default function Header() {
                 </Link>
               );
             })}
+
+            {primaryCategories.map((category) => (
+              <Link
+                key={category.slug}
+                href={`/category/${category.slug}`}
+                className={`${linkBase} ${
+                  isCategoryActive(category.slug)
+                    ? "text-rust-600"
+                    : "text-charcoal-600"
+                }`}
+              >
+                {category.name}
+              </Link>
+            ))}
+
+            {moreCategories.length > 0 ? (
+              <div className="relative" ref={moreRef}>
+                <button
+                  type="button"
+                  onClick={() => setMoreOpen((v) => !v)}
+                  aria-expanded={moreOpen}
+                  aria-haspopup="true"
+                  className={`flex items-center gap-1 ${linkBase} ${
+                    moreCategories.some((c) => isCategoryActive(c.slug))
+                      ? "text-rust-600"
+                      : "text-charcoal-600"
+                  }`}
+                >
+                  More
+                  <CaretDown
+                    size={12}
+                    weight="bold"
+                    className={`transition-transform ${
+                      moreOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                {moreOpen ? (
+                  <div className="absolute right-0 top-full mt-3 min-w-52 overflow-hidden rounded-2xl border border-charcoal-700/10 bg-beige-50 py-2 shadow-lg shadow-charcoal-700/10">
+                    {moreCategories.map((category) => (
+                      <Link
+                        key={category.slug}
+                        href={`/category/${category.slug}`}
+                        className={`block px-4 py-2 text-sm font-medium transition-colors hover:bg-charcoal-700/5 hover:text-rust-600 ${
+                          isCategoryActive(category.slug)
+                            ? "text-rust-600"
+                            : "text-charcoal-600"
+                        }`}
+                      >
+                        {category.name}
+                      </Link>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
           </nav>
 
           <div className="hidden h-6 w-px bg-charcoal-700/10 lg:block" />
@@ -132,7 +218,7 @@ export default function Header() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search stories by title, topic, or author..."
+                placeholder="Search by title, author, or blog number..."
                 className="w-full rounded-full border border-charcoal-700/15 bg-beige-50 py-3 pl-11 pr-4 text-sm text-charcoal-700 placeholder:text-charcoal-300 focus:border-rust-400 focus:outline-none focus:ring-2 focus:ring-rust-400/20"
               />
             </form>
@@ -166,6 +252,26 @@ export default function Header() {
                 </Link>
               );
             })}
+
+            {categories.length > 0 ? (
+              <p className="mt-3 px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-charcoal-300">
+                Categories
+              </p>
+            ) : null}
+            {categories.map((category) => (
+              <Link
+                key={category.slug}
+                href={`/category/${category.slug}`}
+                className={`rounded-lg px-3 py-2.5 text-base font-medium transition-colors ${
+                  isCategoryActive(category.slug)
+                    ? "bg-charcoal-700/5 text-rust-600"
+                    : "text-charcoal-600 hover:bg-charcoal-700/5"
+                }`}
+              >
+                {category.name}
+              </Link>
+            ))}
+
             <Button href="/contact" className="mt-3 w-full">
               Contact
             </Button>

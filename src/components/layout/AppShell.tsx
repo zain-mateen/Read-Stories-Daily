@@ -8,6 +8,12 @@ import ScrollToTop from "./ScrollToTop";
 import SmoothScrollProvider from "./SmoothScrollProvider";
 import PageTransition from "./PageTransition";
 
+export type NavCategory = {
+  slug: string;
+  name: string;
+  inPrimaryNav: boolean;
+};
+
 /**
  * The admin panel (/admin) is a utility dashboard, not part of the public
  * site — it gets a blank canvas instead of the marketing Header/Footer,
@@ -15,7 +21,13 @@ import PageTransition from "./PageTransition";
  * exactly as before. Keeping this decision here (instead of inside
  * Header/Footer/etc.) means none of those components needed to change.
  */
-export default function AppShell({ children }: { children: ReactNode }) {
+export default function AppShell({
+  children,
+  categories,
+}: {
+  children: ReactNode;
+  categories: NavCategory[];
+}) {
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith("/admin");
 
@@ -31,11 +43,11 @@ export default function AppShell({ children }: { children: ReactNode }) {
   return (
     <SmoothScrollProvider>
       <ScrollToTop />
-      <Header />
+      <Header categories={categories} />
       <main className="flex-1">
         <PageTransition>{children}</PageTransition>
       </main>
-      <Footer />
+      <Footer categories={categories} />
     </SmoothScrollProvider>
   );
 }

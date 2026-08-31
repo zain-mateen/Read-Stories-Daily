@@ -2,7 +2,6 @@ import Link from "next/link";
 import { PencilSimple, Plus, Star } from "@phosphor-icons/react/ssr";
 import DeletePostButton from "@/components/admin/DeletePostButton";
 import { getAllPosts } from "@/data/posts";
-import { getCategoryBySlug } from "@/data/categories";
 
 export const dynamic = "force-dynamic";
 
@@ -46,7 +45,6 @@ export default async function AdminPostsPage() {
             </thead>
             <tbody className="divide-y divide-charcoal-700/10">
               {posts.map((post) => {
-                const category = getCategoryBySlug(post.category);
                 return (
                   <tr key={post.id}>
                     <td className="px-5 py-4">
@@ -65,7 +63,12 @@ export default async function AdminPostsPage() {
                       </p>
                     </td>
                     <td className="px-5 py-4 text-charcoal-500">
-                      {category?.name ?? post.category}
+                      {post.categoryName}
+                      {post.blogNumber != null ? (
+                        <span className="ml-2 text-xs text-charcoal-300">
+                          #{post.blogNumber}
+                        </span>
+                      ) : null}
                     </td>
                     <td className="px-5 py-4 text-charcoal-500">{post.date}</td>
                     <td className="px-5 py-4">

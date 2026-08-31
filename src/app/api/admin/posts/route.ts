@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
 import { validatePostPayload } from "@/lib/validatePost";
-import { createPost, getAllPosts, isSlugTaken } from "@/data/posts";
+import {
+  createPost,
+  getAllPosts,
+  isBlogNumberTaken,
+  isSlugTaken,
+} from "@/data/posts";
 
 export async function GET() {
   if (!(await isAuthenticated())) {
@@ -17,7 +22,7 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json().catch(() => null);
-  const result = validatePostPayload(body);
+  const result = await validatePostPayload(body);
   if ("error" in result) {
     return NextResponse.json({ error: result.error }, { status: 400 });
   }
@@ -25,6 +30,16 @@ export async function POST(request: Request) {
   if (await isSlugTaken(result.input.slug)) {
     return NextResponse.json(
       { error: `A post with slug "${result.input.slug}" already exists.` },
+      { status: 409 }
+    );
+  }
+
+  if (
+    result.input.blogNumber !== null &&
+    (await isBlogNumberTaken(result.input.blogNumber))
+  ) {
+    return NextResponse.json(
+      { error: `Blog number ${result.input.blogNumber} is already in use.` },
       { status: 409 }
     );
   }

@@ -16,9 +16,19 @@ export default function ScrollToTop() {
     }
     if (lenis) {
       lenis.scrollTo(0, { immediate: true });
-    } else {
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      // The new route's content is usually taller than the last one. Lenis
+      // caches its scroll limit, so without re-measuring you can't scroll
+      // past where the previous page ended. Re-measure now, next frame, and
+      // once fonts have settled (which shift layout height).
+      lenis.resize();
+      requestAnimationFrame(() => lenis.resize());
+      const t = setTimeout(() => lenis.resize(), 250);
+      if (typeof document !== "undefined" && document.fonts?.ready) {
+        document.fonts.ready.then(() => lenis.resize());
+      }
+      return () => clearTimeout(t);
     }
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [pathname, lenis]);
 
   return null;

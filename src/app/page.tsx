@@ -5,7 +5,7 @@ import FeaturedPost from "@/components/blog/FeaturedPost";
 import BlogCard from "@/components/blog/BlogCard";
 import CategorySection from "@/components/blog/CategorySection";
 import { getFeaturedPost, getRecentPosts } from "@/data/posts";
-import { categories } from "@/data/categories";
+import { getPrimaryCategories } from "@/data/categories";
 
 // Posts are managed live through /admin (database-backed), so this page
 // always renders fresh rather than being baked in at build time.
@@ -14,10 +14,13 @@ export const dynamic = "force-dynamic";
 export default async function Home() {
   const featured = await getFeaturedPost();
   const recent = await getRecentPosts(3, featured?.slug);
+  const primaryCategories = await getPrimaryCategories();
 
   return (
     <>
-      <Hero />
+      <Hero
+        categories={primaryCategories.map((c) => ({ slug: c.slug, name: c.name }))}
+      />
 
       <Container>
         {featured ? (
@@ -51,10 +54,10 @@ export default async function Home() {
           </>
         ) : null}
 
-        {categories.map((category, index) => (
+        {primaryCategories.map((category, index) => (
           <div key={category.slug}>
             <CategorySection categorySlug={category.slug} />
-            {index < categories.length - 1 ? (
+            {index < primaryCategories.length - 1 ? (
               <div className="h-px w-full bg-charcoal-700/10" />
             ) : null}
           </div>

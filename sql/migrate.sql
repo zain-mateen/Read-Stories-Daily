@@ -1,35 +1,10 @@
--- Read Stories Daily — full schema.
+-- Optional manual migration.
 --
--- The app creates and migrates all of this automatically on first DB use
--- (see ensureSchema() in src/lib/db.ts), so you normally do NOT need to run
--- this by hand. It's kept for reference and for setting up a brand-new
--- database from scratch.
+-- The app runs all of this automatically on first DB use (ensureSchema()
+-- in src/lib/db.ts). Only run this by hand if you want to apply the schema
+-- changes before the first request hits the redeployed app.
 --
--- The older sql/database.sql, sql/db-part*.sql, sql/seed.sql and
--- sql/test*.sql files were one-off import helpers for the initial launch
--- and are superseded by this + the automatic migration.
-
-CREATE TABLE IF NOT EXISTS posts (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  slug VARCHAR(255) NOT NULL UNIQUE,
-  title VARCHAR(255) NOT NULL,
-  excerpt TEXT NOT NULL,
-  category VARCHAR(80) NOT NULL,
-  author_name VARCHAR(255) NOT NULL,
-  author_role VARCHAR(255) NOT NULL,
-  author_avatar VARCHAR(500) NOT NULL,
-  published_date DATE NOT NULL,
-  read_time VARCHAR(50) NOT NULL,
-  featured TINYINT(1) NOT NULL DEFAULT 0,
-  image VARCHAR(500) NOT NULL,
-  content LONGTEXT NOT NULL,
-  blog_number INT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_category (category),
-  INDEX idx_published_date (published_date),
-  UNIQUE KEY uq_blog_number (blog_number)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- Safe to run more than once.
 
 CREATE TABLE IF NOT EXISTS categories (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -58,3 +33,10 @@ INSERT IGNORE INTO categories (slug, name, description, sort_order, in_primary_n
   ('love-stories',          'Love Stories',            'Romance in all its forms — the beginnings, the endings, and everything between.', 12, 0),
   ('animal-stories',        'Animal Stories',          'Loyalty, rescue, and the bonds between people and the animals they love.',    13, 0),
   ('strange-unbelievable',  'Strange & Unbelievable',  'The bizarre and the barely-credible — stories that sound made up but aren''t.', 14, 0);
+
+-- Add posts.blog_number if this database predates it.
+-- (MySQL has no "ADD COLUMN IF NOT EXISTS"; if the column already exists
+--  this statement errors harmlessly — just skip it.)
+ALTER TABLE posts
+  ADD COLUMN blog_number INT NULL,
+  ADD UNIQUE KEY uq_blog_number (blog_number);

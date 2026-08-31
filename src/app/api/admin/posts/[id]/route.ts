@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
 import { validatePostPayload } from "@/lib/validatePost";
-import { deletePost, getPostById, isSlugTaken, updatePost } from "@/data/posts";
+import {
+  deletePost,
+  getPostById,
+  isBlogNumberTaken,
+  isSlugTaken,
+  updatePost,
+} from "@/data/posts";
 
 function parseId(idParam: string): number | null {
   const id = Number(idParam);
@@ -39,7 +45,7 @@ export async function PUT(
   if (!existing) return NextResponse.json({ error: "Post not found." }, { status: 404 });
 
   const body = await request.json().catch(() => null);
-  const result = validatePostPayload(body);
+  const result = await validatePostPayload(body);
   if ("error" in result) {
     return NextResponse.json({ error: result.error }, { status: 400 });
   }
@@ -47,6 +53,16 @@ export async function PUT(
   if (await isSlugTaken(result.input.slug, id)) {
     return NextResponse.json(
       { error: `A post with slug "${result.input.slug}" already exists.` },
+      { status: 409 }
+    );
+  }
+
+  if (
+    result.input.blogNumber !== null &&
+    (await isBlogNumberTaken(result.input.blogNumber, id))
+  ) {
+    return NextResponse.json(
+      { error: `Blog number ${result.input.blogNumber} is already in use.` },
       { status: 409 }
     );
   }

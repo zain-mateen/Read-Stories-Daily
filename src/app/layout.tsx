@@ -3,7 +3,11 @@ import Script from "next/script";
 import { Fraunces, Inter } from "next/font/google";
 import AppShell from "@/components/layout/AppShell";
 import { SITE_URL } from "@/lib/siteUrl";
+import { getNavCategories } from "@/data/categories";
 import "./globals.css";
+
+// Categories are read from the database on every request.
+export const dynamic = "force-dynamic";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -19,12 +23,12 @@ const fraunces = Fraunces({
 });
 
 const description =
-  "Read Stories Daily is a modern blog covering travel, lifestyle, culture, and wellness — fresh stories worth reading, every day.";
+  "Read Stories Daily is a modern blog of real-life stories, mysteries, horror, and the strange-but-true — fresh reads every day.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Read Stories Daily — Travel, Lifestyle & Culture Blog",
+    default: "Read Stories Daily — Real Stories, Mystery & More",
     template: "%s — Read Stories Daily",
   },
   description,
@@ -33,12 +37,12 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Read Stories Daily",
     url: SITE_URL,
-    title: "Read Stories Daily — Travel, Lifestyle & Culture Blog",
+    title: "Read Stories Daily — Real Stories, Mystery & More",
     description,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Read Stories Daily — Travel, Lifestyle & Culture Blog",
+    title: "Read Stories Daily — Real Stories, Mystery & More",
     description,
   },
 };
@@ -51,31 +55,42 @@ export const metadata: Metadata = {
 const monetagScriptSrc = process.env.NEXT_PUBLIC_MONETAG_SCRIPT_SRC;
 const monetagZoneId = process.env.NEXT_PUBLIC_MONETAG_ZONE_ID;
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const categories = (await getNavCategories()).map((c) => ({
+    slug: c.slug,
+    name: c.name,
+    inPrimaryNav: c.inPrimaryNav,
+  }));
+
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${fraunces.variable} h-full antialiased`}
+      className={`${inter.variable} ${fraunces.variable} antialiased`}
     >
-    <head>
-      <script src="https://quge5.com/88/tag.min.js" data-zone="274324" async data-cfasync="false"></script>
-    </head>
-      <body className="flex min-h-full flex-col bg-beige-50 text-charcoal-700">
-      <Script
-        src="https://www.googletagmanager.com/gtag/js?id=G-3C8SS4ELCH"
-        strategy="afterInteractive"
-      />
+      <head>
+        <script
+          src="https://quge5.com/88/tag.min.js"
+          data-zone="274324"
+          async
+          data-cfasync="false"
+        />
+      </head>
+      <body className="flex min-h-screen flex-col bg-beige-50 text-charcoal-700">
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-3C8SS4ELCH"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-3C8SS4ELCH');
+          `}
+        </Script>
 
-      <Script id="google-analytics" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
+        <AppShell categories={categories}>{children}</AppShell>
 
-          gtag('config', 'G-3C8SS4ELCH');
-        `}
-      </Script>
-        <AppShell>{children}</AppShell>
         {monetagScriptSrc ? (
           <Script
             id="monetag"

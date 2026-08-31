@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import Container from "@/components/ui/Container";
 import BlogCard from "@/components/blog/BlogCard";
-import { categories, getCategoryBySlug } from "@/data/categories";
+import { getAllCategories, getCategoryBySlug } from "@/data/categories";
 import { getPostsByCategory } from "@/data/posts";
 
 // Posts are managed live through /admin (database-backed), so this route
@@ -14,11 +13,11 @@ export async function generateMetadata(
   props: PageProps<"/category/[slug]">
 ): Promise<Metadata> {
   const { slug } = await props.params;
-  const category = getCategoryBySlug(slug);
+  const category = await getCategoryBySlug(slug);
   if (!category) return {};
   return {
     title: category.name,
-    description: category.description,
+    description: category.description || `Stories in ${category.name}.`,
   };
 }
 
@@ -26,43 +25,32 @@ export default async function CategoryPage(
   props: PageProps<"/category/[slug]">
 ) {
   const { slug } = await props.params;
-  const category = getCategoryBySlug(slug);
+  const category = await getCategoryBySlug(slug);
   if (!category) notFound();
 
-  const posts = await getPostsByCategory(slug);
-  const Icon = category.icon;
+  const [posts, allCategories] = await Promise.all([
+    getPostsByCategory(slug),
+    getAllCategories(),
+  ]);
 
   return (
     <>
-      <section className="relative flex min-h-[280px] items-end overflow-hidden border-b border-charcoal-700/10 sm:min-h-[320px]">
-        <Image
-          src={category.image}
-          alt={category.name}
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-charcoal-900/90 via-charcoal-900/55 to-charcoal-900/25" />
-        <div className="absolute inset-0 bg-gradient-to-r from-charcoal-900/55 via-charcoal-900/10 to-transparent" />
+      <section className="relative flex min-h-[240px] items-end overflow-hidden border-b border-charcoal-700/10 bg-charcoal-800 sm:min-h-[280px]">
+        <div className="absolute inset-0 bg-gradient-to-t from-charcoal-900 via-charcoal-900/70 to-charcoal-800" />
+        <div className="absolute inset-0 bg-gradient-to-r from-rust-600/20 via-transparent to-transparent" />
 
         <Container className="relative w-full py-10 sm:py-12">
-          <div className="flex items-center gap-4">
-            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-beige-50/15 text-beige-50 backdrop-blur-sm">
-              <Icon size={26} weight="light" />
-            </span>
-            <div>
-              <span className="text-xs font-semibold uppercase tracking-widest text-rust-400">
-                Category
-              </span>
-              <h1 className="font-display text-3xl font-semibold text-beige-50 sm:text-4xl">
-                {category.name}
-              </h1>
-            </div>
-          </div>
-          <p className="mt-4 max-w-2xl text-base leading-relaxed text-beige-100/85">
-            {category.description}
-          </p>
+          <span className="text-xs font-semibold uppercase tracking-widest text-rust-400">
+            Category
+          </span>
+          <h1 className="mt-2 font-display text-3xl font-semibold text-beige-50 sm:text-4xl">
+            {category.name}
+          </h1>
+          {category.description ? (
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-beige-100/85">
+              {category.description}
+            </p>
+          ) : null}
         </Container>
       </section>
 
@@ -71,17 +59,16 @@ export default async function CategoryPage(
           <span className="mr-1 text-xs font-semibold uppercase tracking-wide text-charcoal-300">
             Browse:
           </span>
-          {categories.map((c) => (
+          {allCategories.map((c) => (
             <a
               key={c.slug}
               href={`/category/${c.slug}`}
-              className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                 c.slug === category.slug
                   ? "bg-charcoal-700 text-beige-50"
                   : "border border-charcoal-700/15 bg-beige-50 text-charcoal-600 hover:border-rust-400 hover:text-rust-600"
               }`}
             >
-              <c.icon size={14} />
               {c.name}
             </a>
           ))}

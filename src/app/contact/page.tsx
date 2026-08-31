@@ -1,14 +1,5 @@
 import type { Metadata } from "next";
-import {
-  Clock,
-  EnvelopeSimple,
-  FacebookLogo,
-  InstagramLogo,
-  MapPinLine,
-  Phone,
-  TwitterLogo,
-  YoutubeLogo,
-} from "@phosphor-icons/react/ssr";
+import { Clock, EnvelopeSimple } from "@phosphor-icons/react/ssr";
 import Container from "@/components/ui/Container";
 import ContactForm from "@/components/contact/ContactForm";
 import { site } from "@/data/site";
@@ -26,28 +17,10 @@ const infoCards = [
     href: `mailto:${site.email}`,
   },
   {
-    icon: Phone,
-    label: "Phone",
-    value: site.phone,
-    href: `tel:${site.phone.replace(/[^+\d]/g, "")}`,
-  },
-  {
-    icon: MapPinLine,
-    label: "Studio",
-    value: site.address,
-  },
-  {
     icon: Clock,
-    label: "Hours",
-    value: "Mon – Fri, 9am – 5pm PT",
+    label: "Response time",
+    value: "We usually reply within 1–2 business days",
   },
-];
-
-const socialLinks = [
-  { label: "Instagram", href: site.social.instagram, icon: InstagramLogo },
-  { label: "Twitter", href: site.social.twitter, icon: TwitterLogo },
-  { label: "Facebook", href: site.social.facebook, icon: FacebookLogo },
-  { label: "YouTube", href: site.social.youtube, icon: YoutubeLogo },
 ];
 
 export default function ContactPage() {
@@ -99,26 +72,6 @@ export default function ContactPage() {
                   </div>
                 </div>
               ))}
-            </div>
-
-            <div>
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-charcoal-300">
-                Follow along
-              </p>
-              <div className="flex items-center gap-3">
-                {socialLinks.map(({ label, href, icon: Icon }) => (
-                  <a
-                    key={label}
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={label}
-                    className="flex h-10 w-10 items-center justify-center rounded-full border border-charcoal-700/15 text-charcoal-600 transition-colors hover:border-rust-400 hover:text-rust-600"
-                  >
-                    <Icon size={17} />
-                  </a>
-                ))}
-              </div>
             </div>
           </div>
 

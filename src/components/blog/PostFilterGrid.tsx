@@ -3,16 +3,19 @@
 import { useMemo, useState } from "react";
 import { MagnifyingGlass, SlidersHorizontal, X } from "@phosphor-icons/react";
 import type { Post } from "@/data/posts";
-import { categories } from "@/data/categories";
 import BlogCard from "./BlogCard";
+
+type CategoryOption = { slug: string; name: string };
 
 export default function PostFilterGrid({
   posts,
+  categories,
   showSearch = false,
   initialQuery = "",
   initialCategory = "all",
 }: {
   posts: Post[];
+  categories: CategoryOption[];
   showSearch?: boolean;
   initialQuery?: string;
   initialCategory?: string;
@@ -22,15 +25,18 @@ export default function PostFilterGrid({
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
+    const numericQuery = /^\d+$/.test(q) ? Number(q) : null;
     return posts.filter((post) => {
       const matchesCategory =
         activeCategory === "all" || post.category === activeCategory;
       if (!matchesCategory) return false;
       if (!q) return true;
+      if (numericQuery !== null && post.blogNumber === numericQuery) return true;
       return (
         post.title.toLowerCase().includes(q) ||
-        post.excerpt.toLowerCase().includes(q) ||
-        post.author.name.toLowerCase().includes(q)
+        post.author.name.toLowerCase().includes(q) ||
+        post.categoryName.toLowerCase().includes(q) ||
+        (post.excerpt ?? "").toLowerCase().includes(q)
       );
     });
   }, [posts, query, activeCategory]);
@@ -43,7 +49,7 @@ export default function PostFilterGrid({
       ).length;
     }
     return map;
-  }, [posts]);
+  }, [posts, categories]);
 
   return (
     <div>
@@ -57,7 +63,7 @@ export default function PostFilterGrid({
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search stories by title, topic, or author..."
+            placeholder="Search by title, author, or blog number..."
             className="w-full rounded-full border border-charcoal-700/15 bg-beige-50 py-3.5 pl-11 pr-11 text-sm text-charcoal-700 placeholder:text-charcoal-300 transition-colors focus:border-rust-400 focus:outline-none focus:ring-2 focus:ring-rust-400/20 sm:text-base"
           />
           {query ? (
@@ -95,13 +101,12 @@ export default function PostFilterGrid({
             key={category.slug}
             type="button"
             onClick={() => setActiveCategory(category.slug)}
-            className={`flex cursor-pointer items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+            className={`cursor-pointer rounded-full px-4 py-2 text-sm font-medium transition-colors ${
               activeCategory === category.slug
                 ? "bg-charcoal-700 text-beige-50"
                 : "border border-charcoal-700/15 bg-beige-50 text-charcoal-600 hover:border-rust-400 hover:text-rust-600"
             }`}
           >
-            <category.icon size={14} />
             {category.name}
             <span className="ml-0.5 opacity-60">
               {counts[category.slug] ?? 0}
