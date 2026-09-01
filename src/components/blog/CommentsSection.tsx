@@ -173,17 +173,6 @@ export default function CommentsSection({
 
   return (
     <section id="comments" aria-labelledby="comments-heading">
-      <div className="flex items-center gap-2.5">
-        <ChatCircle size={22} className="text-rust-500" weight="fill" />
-        <h2
-          id="comments-heading"
-          className="font-display text-2xl font-semibold text-charcoal-800"
-        >
-          {comments.length === 0
-            ? "Comments"
-            : `${comments.length} Comment${comments.length === 1 ? "" : "s"}`}
-        </h2>
-      </div>
 
       <form
         onSubmit={handleSubmit}
@@ -250,6 +239,18 @@ export default function CommentsSection({
           </button>
         </div>
       </form>
+      
+      <div className="flex items-center gap-2.5">
+        <ChatCircle size={22} className="text-rust-500" weight="fill" />
+        <h2
+          id="comments-heading"
+          className="font-display text-2xl font-semibold text-charcoal-800"
+        >
+          {comments.length === 0
+            ? "Comments"
+            : `${comments.length} Comment${comments.length === 1 ? "" : "s"}`}
+        </h2>
+      </div>
 
       {comments.length > 0 ? (
         <ul className="mt-8 flex flex-col gap-6">
