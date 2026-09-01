@@ -29,7 +29,7 @@ export default function FeaturedPost({ post }: { post: Post }) {
           <Star size={13} weight="fill" />
           Featured Story
         </span>
-        <h2 className="font-display text-2xl font-semibold leading-tight text-charcoal-800 transition-colors group-hover:text-rust-600 sm:text-3xl lg:text-[2.25rem]">
+        <h2 className="line-clamp-3 font-display text-2xl font-semibold leading-tight text-charcoal-800 transition-colors group-hover:text-rust-600 sm:text-3xl lg:text-[2.25rem]">
           {post.title}
         </h2>
         <p className="line-clamp-3 max-w-md text-base leading-relaxed text-charcoal-400">

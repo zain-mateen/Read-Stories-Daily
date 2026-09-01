@@ -7,6 +7,7 @@ import Container from "@/components/ui/Container";
 import BlogCard from "@/components/blog/BlogCard";
 import CoverArt from "@/components/blog/CoverArt";
 import CommentsSection from "@/components/blog/CommentsSection";
+import SharePost from "@/components/blog/SharePost";
 import SectionHeading from "@/components/ui/SectionHeading";
 import {
   getPostBySlug,
@@ -15,6 +16,7 @@ import {
 } from "@/data/posts";
 import { getCommentsForPost } from "@/data/comments";
 import { postSummary } from "@/lib/postText";
+import { SITE_URL } from "@/lib/siteUrl";
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-US", {
@@ -190,7 +192,13 @@ export default async function BlogPostPage(props: PageProps<"/blog/[slug]">) {
 
       <Container>
         <div className="mx-auto max-w-3xl border-t border-charcoal-700/10 py-12 sm:py-14">
-          <CommentsSection postSlug={post.slug} initialComments={comments} />
+          <SharePost
+            url={`${SITE_URL}/blog/${post.slug}`}
+            title={post.title}
+          />
+          <div className="mt-12 border-t border-charcoal-700/10 pt-12 sm:mt-14 sm:pt-14">
+            <CommentsSection postSlug={post.slug} initialComments={comments} />
+          </div>
         </div>
       </Container>
 
