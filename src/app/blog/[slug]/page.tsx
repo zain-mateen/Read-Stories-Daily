@@ -172,7 +172,7 @@ export default async function BlogPostPage(props: PageProps<"/blog/[slug]">) {
             <ContentBlock key={i} block={block} />
           ))}
 
-          <div className="mt-10 flex items-center gap-4 rounded-2xl border border-charcoal-700/10 bg-beige-100/60 p-6">
+          {/* <div className="mt-10 flex items-center gap-4 rounded-2xl border border-charcoal-700/10 bg-beige-100/60 p-6">
             <Image
               src={post.author.avatar}
               alt={post.author.name}
@@ -186,7 +186,7 @@ export default async function BlogPostPage(props: PageProps<"/blog/[slug]">) {
               </p>
               <p className="text-sm text-charcoal-400">{post.author.role}</p>
             </div>
-          </div>
+          </div> */}
         </div>
       </Container>
 

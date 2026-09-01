@@ -185,40 +185,6 @@ export default function CommentsSection({
         </h2>
       </div>
 
-      {comments.length > 0 ? (
-        <ul className="mt-8 flex flex-col gap-6">
-          {comments.map((comment) => (
-            <li key={comment.id} className="flex gap-3.5">
-              <span
-                aria-hidden
-                className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-charcoal-700/8 text-sm font-semibold text-charcoal-500"
-              >
-                {initials(comment.authorName)}
-              </span>
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                  <span className="font-semibold text-charcoal-700">
-                    {comment.authorName}
-                  </span>
-                  <span className="text-xs text-charcoal-300">
-                    {formatWhen(comment.createdAt, mounted)}
-                  </span>
-                </div>
-                <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-relaxed text-charcoal-500">
-                  {comment.body}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="mt-6 text-sm text-charcoal-400">
-          No comments yet — be the first to share your thoughts.
-        </p>
-      )}
-
-      <div ref={listEndRef} />
-
       <form
         onSubmit={handleSubmit}
         className="mt-10 rounded-2xl border border-charcoal-700/10 bg-beige-100/60 p-5 sm:p-6"
@@ -284,6 +250,42 @@ export default function CommentsSection({
           </button>
         </div>
       </form>
+
+      {comments.length > 0 ? (
+        <ul className="mt-8 flex flex-col gap-6">
+          {comments.map((comment) => (
+            <li key={comment.id} className="flex gap-3.5">
+              <span
+                aria-hidden
+                className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-charcoal-700/8 text-sm font-semibold text-charcoal-500"
+              >
+                {initials(comment.authorName)}
+              </span>
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                  <span className="font-semibold text-charcoal-700">
+                    {comment.authorName}
+                  </span>
+                  <span className="text-xs text-charcoal-300">
+                    {formatWhen(comment.createdAt, mounted)}
+                  </span>
+                </div>
+                <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-relaxed text-charcoal-500">
+                  {comment.body}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-6 text-sm text-charcoal-400">
+          No comments yet — be the first to share your thoughts.
+        </p>
+      )}
+
+      <div ref={listEndRef} />
+
+      
     </section>
   );
 }
